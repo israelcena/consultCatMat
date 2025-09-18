@@ -13,11 +13,28 @@ const axios = require("axios");
 
 const BASE_URL = "https://dadosabertos.compras.gov.br/modulo-material/4_consultarItemMaterial";
 const TAMANHO_PAGINA = 500;
+const TIME_TO_SLEEP = 700;
 
 // Função para criar registro no banco (aqui só exibe no console)
 async function create(itemTabela) {
   // Substitua este console.log pelo seu insert real
   console.log("Vou criar no banco:", itemTabela);
+}
+
+async function update(itemTabela) {
+  console.log("UPDATE:", itemTabela);
+  // Atualize os campos do registro no banco com base no itemTabela.
+}
+
+async function findByIdcatmat(idcatmat) {
+  // Buscar registro no banco onde idcatmat = idcatmat
+  // Exemplo: SELECT * FROM tabela WHERE idcatmat = $1
+  // Retorne null se não achou, ou objeto do registro se achou.
+  return null; // Simula que não achou
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function importarCatmat() {
@@ -49,7 +66,17 @@ async function importarCatmat() {
             atualizacao: item.dataHoraAtualizacao
           };
 
-          await create(registroTabela);
+          const existente = await findByIdcatmat(registroTabela.idcatmat);
+          if (!existente) {
+            await create(registroTabela);
+          } else if (
+            registroTabela.atualizacao &&
+            anterior.atualizacao === registroTabela.atualizacao
+          ) {
+            // Não faz nada, está atualizado
+          } else {
+            await update(registroTabela);
+          }
         }
       } catch (errPag) {
         console.error("ERRO página " + pagina + ":", errPag.message);
@@ -57,6 +84,7 @@ async function importarCatmat() {
         // Se quiser continuar mesmo com erro: continue;
         // Se quiser parar: throw errPag;
       }
+      await sleep(TIME_TO_SLEEP);
     }
     console.log("-- FINALIZADO --");
   } catch (err) {
@@ -93,12 +121,24 @@ async function importarCatser() {
             atualizacao: item.dataHoraAtualizacao
           };
 
-          await create(registroTabela);
+          const existente = await findByIdcatmat(registroTabela.idcatmat);
+          if (!existente) {
+            await create(registroTabela);
+          } else if (
+            registroTabela.atualizacao &&
+            anterior.atualizacao === registroTabela.atualizacao
+          ) {
+            // Não faz nada, está atualizado
+          } else {
+            await update(registroTabela);
+          }
+
         }
       } catch (errPag) {
         console.error("ERRO página " + pagina + ":", errPag.message);
         continue; // Comente ou descomente conforme desejar pular a página com erro
       }
+      await sleep(TIME_TO_SLEEP);
     }
     console.log("-- FINALIZADO [SERVIÇOS] --");
   } catch (err) {
