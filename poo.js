@@ -10,12 +10,14 @@ class ImportCatmatCatserService {
     this.BASE_URL_CATSER = "https://dadosabertos.compras.gov.br/modulo-servico/6_consultarItemServico";
   }
   async create(content) {
+    await this.sleep(2000);
     console.log('Simula CREATE no banco:', content);
   }
   async update(content) {
     console.log('Simula UPDATE no banco:', content);
   }
   async findByIdcatmat(idcatmat) {
+    await this.sleep(2000);
     // Simula busca: retorna null para sempre simular "não existe"
     // Ou retorne objetão fake se quiser testar update!
     console.log('Simula busca no banco catmat/catser pelo número:', idcatmat);
@@ -46,7 +48,7 @@ class ImportCatmatCatserService {
       nome: item.nomeServico,
       descricao: item.nomeClasse,
       tipo: "Serviço",
-      codigo_universal_catmat: String(item.codigoItem),
+      codigo_universal_catmat: String(item.codigoServico),
       ativo: item.statusServico ? "S" : "N",
       atualizacao: item.dataHoraAtualizacao
     };
@@ -111,20 +113,19 @@ class ImportCatmatCatserService {
     const dtString = data_fim.toLocaleString("pt-BR");
     return `A atualização foi gerada em ${dtString}, com ${duracaoTxt}.`;
   }
-  async execute(params) {
+  async execute() {
     const data_inicio = new Date();
-    // Processa catmat depois catser, não em paralelo
-    const catmatStats = await this.importarService({
+    const [catmatStats, catserStats] = await Promise.all([
+    this.importarService({
       baseUrl: this.BASE_URL_CATMAT,
       tipoLog: '[CATMAT]',
       itemToRegistroTabela: this.mapItemCatmat,
-    });
-    await this.sleep(this.TIME_TO_SLEEP);
-    const catserStats = await this.importarService({
+    }),
+    this.importarService({
       baseUrl: this.BASE_URL_CATSER,
       tipoLog: '[CATSER]',
       itemToRegistroTabela: this.mapItemCatser,
-    });
+    })]);
     const data_fim = new Date();
     await this.logImportacao({
       origem: 'CATMAT/CATSER',
