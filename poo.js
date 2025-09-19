@@ -5,26 +5,26 @@ class ImportCatmatCatserService {
     // Comentado pois é específico do FaaS. Use console.log simulando banco.
     // this.catmatcatserDB = ...
     // this.catmatcatserLogDB = ...
-    this.TIME_TO_SLEEP = 2;
+    this.TIME_TO_SLEEP = 500;
     this.BASE_URL_CATMAT = "https://dadosabertos.compras.gov.br/modulo-material/4_consultarItemMaterial";
     this.BASE_URL_CATSER = "https://dadosabertos.compras.gov.br/modulo-servico/6_consultarItemServico";
   }
   async create(content) {
-    console.log('Simula CREATE no banco:', JSON.stringify(content));
+    console.log('Simula CREATE no banco:', content);
   }
   async update(content) {
-    console.log('Simula UPDATE no banco:', JSON.stringify(content));
+    console.log('Simula UPDATE no banco:', content);
   }
   async findByIdcatmat(idcatmat) {
     // Simula busca: retorna null para sempre simular "não existe"
     // Ou retorne objetão fake se quiser testar update!
-    console.log('Simula busca no banco catmat/catser pelo número:', JSON.stringify(idcatmat));
+    console.log('Simula busca no banco catmat/catser pelo número:', idcatmat);
     return null;
     // Exemplo se quiser simular "já existe" para fazer update ao invés de create:
     // return { atualizacao: "2024-01-01T00:00:00.000Z" };
   }
   async logImportacao(content) {
-    console.log('LOG registrador:', JSON.stringify(content));
+    console.log('LOG registrador:', content);
   }
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -55,12 +55,12 @@ class ImportCatmatCatserService {
     let criados = 0, atualizados = 0, verificados = 0;
     try {
       // Descobrir total de páginas
-      const primeiraUrl = `${baseUrl}?tamanhoPagina=5&pagina=1`; // reduz volume para teste local
+      const primeiraUrl = `${baseUrl}?tamanhoPagina=500&pagina=1`;
       const primeiraResp = await axios.get(primeiraUrl);
-      const totalPaginas = Math.min(3, primeiraResp.data.totalPaginas); // limitar para não usar a API toda
+      const totalPaginas = primeiraResp.data.totalPaginas;
       console.log(`${tipoLog} TOTAL DE PÁGINAS:`, totalPaginas);
       for (let pagina = 1; pagina <= totalPaginas; pagina++) {
-        const url = `${baseUrl}?tamanhoPagina=5&pagina=${pagina}`;
+        const url = `${baseUrl}?tamanhoPagina=500&pagina=${pagina}`;
         console.log(`${tipoLog} Baixando página ${pagina}/${totalPaginas}`);
         try {
           const resp = await axios.get(url);
